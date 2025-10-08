@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import unicodedata
 import matplotlib.pyplot as plt
 
 
@@ -86,18 +87,7 @@ def _format_block(grupo_rows, titulo_visivel: str):
     return lines
 
 
-def print_table(rows, produto: str):
-    print(f"Produto: {produto}\n")
-    for tipo in ["Produto Novo", "Produto Usado"]:
-        grupo = [r for r in rows if r["Tipo"] == tipo]
-        if not grupo:
-            continue
-        for line in _format_block(grupo, tipo):
-            print(line)
-        print()
-
-
-def save_png_table(rows, produto: str, output_path: Path = Path("precos_otimizados.png")) -> Path:
+def _build_output_lines(rows, produto: str) -> list[str]:
     all_lines = [f"Produto: {produto}", ""]
     for i, tipo in enumerate(["Produto Novo", "Produto Usado"]):
         grupo = [r for r in rows if r["Tipo"] == tipo]
@@ -106,6 +96,16 @@ def save_png_table(rows, produto: str, output_path: Path = Path("precos_otimizad
         all_lines.extend(_format_block(grupo, tipo))
         if i == 0:
             all_lines.append("")
+    return all_lines
+
+
+def print_table(rows, produto: str):
+    for line in _build_output_lines(rows, produto):
+        print(line)
+
+
+def save_png_table(rows, produto: str, output_path: Path) -> Path:
+    all_lines = _build_output_lines(rows, produto)
     fontsize = 12
     line_height = 1.10
     left_pad_in = 0.35
@@ -132,6 +132,21 @@ def save_png_table(rows, produto: str, output_path: Path = Path("precos_otimizad
     return output_path
 
 
+def _slug_filename(name: str) -> str:
+    norm = unicodedata.normalize("NFKD", name)
+    ascii_only = norm.encode("ascii", "ignore").decode("ascii")
+    safe = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in ascii_only.strip())
+    safe = "_".join(filter(None, safe.split("_")))  # remove underscores duplicados
+    return safe or "produto"
+
+
+def _output_dir() -> Path:
+    script_dir = Path(__file__).resolve().parent
+    out_dir = script_dir.parent / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
+
+
 def main():
     if len(sys.argv) > 1:
         path = Path(sys.argv[1]).expanduser()
@@ -142,15 +157,27 @@ def main():
         if path is None:
             print("Arquivo de entrada não encontrado.\nCrie o arquivo relativo ao script:\n - {}".format(candidates[0]))
             sys.exit(1)
+
     try:
         produto, preco_novo, preco_usado = _read_input(path)
     except Exception as e:
         print(f"Erro ao ler arquivo de entrada '{path}': {e}")
         sys.exit(1)
+
     rows = compute_rows(preco_novo, preco_usado)
     print_table(rows, produto)
-    out = save_png_table(rows, produto)
-    print(f"\nImagem gerada: {out.resolve()}")
+
+    out_dir = _output_dir()
+    base = f"preco_otimizado_{_slug_filename(produto)}"
+    png_path = out_dir / f"{base}.png"
+    txt_path = out_dir / f"{base}.txt"
+
+    save_png_table(rows, produto, png_path)
+    with open(txt_path, "w", encoding="utf-8") as f:
+        for ln in _build_output_lines(rows, produto):
+            f.write(ln + "\n")
+
+    print(f"\nArquivos gerados:\n - {png_path.resolve()}\n - {txt_path.resolve()}")
 
 
 if __name__ == "__main__":
