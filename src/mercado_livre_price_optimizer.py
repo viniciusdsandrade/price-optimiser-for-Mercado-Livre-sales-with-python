@@ -143,7 +143,7 @@ def main() -> None:
         path = Path(sys.argv[1]).expanduser()
     else:
         script_dir = Path(__file__).resolve().parent
-        candidates = [script_dir / "product"]
+        candidates = [Path(__file__).resolve().parent.parent / "input" / "product"]
         path = next((p for p in candidates if p.exists()), None)
         if path is None:
             print(f"Arquivo de entrada não encontrado.\nCrie o arquivo relativo ao script:\n - {candidates[0]}")
