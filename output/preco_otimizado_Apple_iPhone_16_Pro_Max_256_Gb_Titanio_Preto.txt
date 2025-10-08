@@ -1,0 +1,21 @@
+Produto: Apple iPhone 16 Pro Max (256 Gb) Titânio Preto
+
+Produto Novo
+Categoria                                      Multiplicador  Preço Otimizado
+-----------------------------------------------------------------------------
+Preço Competitivo                                       0.95      R$ 9.403,10
+Preço Muito Competitivo                                 0.87      R$ 8.611,26
+Preço Extremamente Competitivo                          0.75      R$ 7.423,50
+Preço com Pressa Moderada                               0.62      R$ 6.136,76
+Preço com Muita Pressa                                  0.49      R$ 4.850,02
+Preço com Pressa Extrema e Desespero Moderado           0.40      R$ 3.959,20
+Preço com Pressa Extrema e Extremo Desespero            0.33      R$ 3.299,00
+
+Produto Usado
+Categoria                             Multiplicador  Preço Otimizado
+--------------------------------------------------------------------
+Preço Muito Competitivo                        0.95      R$ 7.220,00
+Preço Extremamente competitivo                 0.85      R$ 6.460,00
+Preço com Moderada Pressa                      0.75      R$ 5.700,00
+Preço com Muita Pressa                         0.66      R$ 5.016,00
+Preço com Extrema Pressa e Desespero           0.50      R$ 3.800,00

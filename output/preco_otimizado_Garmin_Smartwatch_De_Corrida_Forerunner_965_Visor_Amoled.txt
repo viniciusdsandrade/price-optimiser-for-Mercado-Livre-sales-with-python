@@ -1,0 +1,21 @@
+Produto: Garmin Smartwatch De Corrida Forerunner® 965, Visor Amoled
+
+Produto Novo
+Categoria                                      Multiplicador  Preço Otimizado
+-----------------------------------------------------------------------------
+Preço Competitivo                                       0.95        R$ 915,80
+Preço Muito Competitivo                                 0.87        R$ 838,68
+Preço Extremamente Competitivo                          0.75        R$ 723,00
+Preço com Pressa Moderada                               0.62        R$ 597,68
+Preço com Muita Pressa                                  0.49        R$ 472,36
+Preço com Pressa Extrema e Desespero Moderado           0.40        R$ 385,60
+Preço com Pressa Extrema e Extremo Desespero            0.33        R$ 321,30
+
+Produto Usado
+Categoria                             Multiplicador  Preço Otimizado
+--------------------------------------------------------------------
+Preço Muito Competitivo                        0.95        R$ 851,20
+Preço Extremamente competitivo                 0.85        R$ 761,60
+Preço com Moderada Pressa                      0.75        R$ 672,00
+Preço com Muita Pressa                         0.66        R$ 591,36
+Preço com Extrema Pressa e Desespero           0.50        R$ 448,00
