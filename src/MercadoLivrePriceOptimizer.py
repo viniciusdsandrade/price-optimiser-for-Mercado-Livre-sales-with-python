@@ -46,15 +46,15 @@ def compute_rows(preco_novo: float, preco_usado: float):
         ("1.B", "Produto (1) Novo", "B - Preço Muito Competitivo 0,87x", 0.87),
         ("1.C", "Produto (1) Novo", "C - Preço Extremamente Competitivo 0,75x", 0.75),
         ("1.D", "Produto (1) Novo", "D - Preço com Pressa Moderada 0,62x", 0.62),
-        ("1.E", "Produto (1) Novo", "E - Preço com Muita Preço 0,49x", 0.49),
+        ("1.E", "Produto (1) Novo", "E - Preço com Muita Pressa 0,49x", 0.49),
         ("1.F", "Produto (1) Novo", "F - Preço com Extrema Pressa e Desespero Moderado 0,4x", 0.40),
         ("1.G", "Produto (1) Novo", "G - Preço com Extrema Pressa e Extremo Desespero 0,3333x", 0.3333),
     ]
     usado_rules = [
         ("2.A", "Produto (2) Usado", "A - Preço Muito Competitivo 0,95x", 0.95),
         ("2.B", "Produto (2) Usado", "B - Preço Extremamente competitivo 0,85x", 0.85),
-        ("2.C", "Produto (2) Usado", "C - Preço com Muito Pressa 0,75x", 0.75),
-        ("2.D", "Produto (2) Usado", "D - Preço com Extrema Pressa 0,66x", 0.66),
+        ("2.C", "Produto (2) Usado", "C - Preço com Moderada Pressa 0,75x", 0.75),
+        ("2.D", "Produto (2) Usado", "D - Preço com Muita Pressa 0,66x", 0.66),
         ("2.E", "Produto (2) Usado", "E - Preço com Extrema Pressa e Desespero 0,50x", 0.50),
     ]
     rows = []
