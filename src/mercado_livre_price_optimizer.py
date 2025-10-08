@@ -3,6 +3,25 @@ from pathlib import Path
 import unicodedata
 import matplotlib.pyplot as plt
 
+RULES: dict[str, list[tuple[str, float]]] = {
+    "Produto Novo": [
+        ("Preço Competitivo", 0.95),
+        ("Preço Muito Competitivo", 0.87),
+        ("Preço Extremamente Competitivo", 0.75),
+        ("Preço com Pressa Moderada", 0.62),
+        ("Preço com Muita Pressa", 0.49),
+        ("Preço com Pressa Extrema e Desespero Moderado", 0.40),
+        ("Preço com Pressa Extrema e Extremo Desespero", 0.3333),
+    ],
+    "Produto Usado": [
+        ("Preço Muito Competitivo", 0.95),
+        ("Preço Extremamente competitivo", 0.85),
+        ("Preço com Moderada Pressa", 0.75),
+        ("Preço com Muita Pressa", 0.66),
+        ("Preço com Extrema Pressa e Desespero", 0.50),
+    ],
+}
+
 
 def _parse_price(s: str) -> float:
     s = s.strip().replace("R$", "").replace(" ", "")
@@ -15,7 +34,7 @@ def _parse_price(s: str) -> float:
 
 def _read_input(path: Path) -> tuple[str, float, float]:
     with open(path, "r", encoding="utf-8") as f:
-        lines = [ln.strip() for ln in f.readlines() if ln.strip()]
+        lines = [ln.strip() for ln in f if ln.strip()]
     if len(lines) < 3:
         raise ValueError("O arquivo precisa conter 3 linhas: nome do produto, preço novo, preço usado.")
     name = lines[0]
@@ -33,47 +52,6 @@ def _fmt_money(v: float) -> str:
     return f"R$ {'-' if v < 0 else ''}{s_inteiro},{s_frac}"
 
 
-def _config() -> dict:
-    return {
-        "novo": [
-            {"label": "Preço Competitivo", "mult": 0.95},
-            {"label": "Preço Muito Competitivo", "mult": 0.87},
-            {"label": "Preço Extremamente Competitivo", "mult": 0.75},
-            {"label": "Preço com Pressa Moderada", "mult": 0.62},
-            {"label": "Preço com Muita Pressa", "mult": 0.49},
-            {"label": "Preço com Pressa Extrema e Desespero Moderado", "mult": 0.40},
-            {"label": "Preço com Pressa Extrema e Extremo Desespero", "mult": 0.3333},
-        ],
-        "usado": [
-            {"label": "Preço Muito Competitivo", "mult": 0.95},
-            {"label": "Preço Extremamente competitivo", "mult": 0.85},
-            {"label": "Preço com Moderada Pressa", "mult": 0.75},
-            {"label": "Preço com Muita Pressa", "mult": 0.66},
-            {"label": "Preço com Extrema Pressa e Desespero", "mult": 0.50},
-        ],
-    }
-
-
-def compute_rows(preco_novo: float, preco_usado: float):
-    cfg = _config()
-    rows = []
-    for item in cfg["novo"]:
-        rows.append({
-            "Tipo": "Produto Novo",
-            "Categoria": item["label"],
-            "Multiplicador": item["mult"],
-            "Preço Otimizado": round(preco_novo * item["mult"], 2),
-        })
-    for item in cfg["usado"]:
-        rows.append({
-            "Tipo": "Produto Usado",
-            "Categoria": item["label"],
-            "Multiplicador": item["mult"],
-            "Preço Otimizado": round(preco_usado * item["mult"], 2),
-        })
-    return rows
-
-
 def _format_block(grupo_rows, titulo_visivel: str):
     cat_w = max(len("Categoria"), *(len(r["Categoria"]) for r in grupo_rows))
     mult_w = max(len("Multiplicador"), *(len(f"{r['Multiplicador']:.2f}") for r in grupo_rows))
@@ -85,6 +63,23 @@ def _format_block(grupo_rows, titulo_visivel: str):
         lines.append(
             f"{r['Categoria']:<{cat_w}}  {r['Multiplicador']:>{mult_w}.2f}  {_fmt_money(r['Preço Otimizado']):>{preco_w}}")
     return lines
+
+
+def compute_rows(preco_novo: float, preco_usado: float):
+    base_map = {"Produto Novo": preco_novo, "Produto Usado": preco_usado}
+    rows: list[dict] = []
+    for tipo, rules in RULES.items():
+        base = base_map[tipo]
+        rows.extend(
+            {
+                "Tipo": tipo,
+                "Categoria": label,
+                "Multiplicador": mult,
+                "Preço Otimizado": round(base * mult, 2),
+            }
+            for label, mult in rules
+        )
+    return rows
 
 
 def _build_output_lines(rows, produto: str) -> list[str]:
@@ -99,7 +94,7 @@ def _build_output_lines(rows, produto: str) -> list[str]:
     return all_lines
 
 
-def print_table(rows, produto: str):
+def print_table(rows, produto: str) -> None:
     for line in _build_output_lines(rows, produto):
         print(line)
 
@@ -108,14 +103,10 @@ def save_png_table(rows, produto: str, output_path: Path) -> Path:
     all_lines = _build_output_lines(rows, produto)
     fontsize = 12
     line_height = 1.10
-    left_pad_in = 0.35
-    right_pad_in = 0.35
-    top_pad_in = 0.35
-    bottom_pad_in = 0.35
-    max_chars = max(len(ln) for ln in all_lines) if all_lines else 60
+    left_pad_in = right_pad_in = top_pad_in = bottom_pad_in = 0.35
+    max_chars = max((len(ln) for ln in all_lines), default=60)
     char_w_in = (fontsize / 72.0) * 0.60
-    text_w_in = max_chars * char_w_in
-    fig_w_in = left_pad_in + text_w_in + right_pad_in
+    fig_w_in = left_pad_in + max_chars * char_w_in + right_pad_in
     line_h_in = (fontsize / 72.0) * line_height
     fig_h_in = top_pad_in + len(all_lines) * line_h_in + bottom_pad_in
     fig = plt.figure(figsize=(fig_w_in, fig_h_in), dpi=200)
@@ -136,7 +127,7 @@ def _slug_filename(name: str) -> str:
     norm = unicodedata.normalize("NFKD", name)
     ascii_only = norm.encode("ascii", "ignore").decode("ascii")
     safe = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in ascii_only.strip())
-    safe = "_".join(filter(None, safe.split("_")))  # remove underscores duplicados
+    safe = "_".join(filter(None, safe.split("_")))
     return safe or "produto"
 
 
@@ -147,7 +138,7 @@ def _output_dir() -> Path:
     return out_dir
 
 
-def main():
+def main() -> None:
     if len(sys.argv) > 1:
         path = Path(sys.argv[1]).expanduser()
     else:
@@ -155,7 +146,7 @@ def main():
         candidates = [script_dir / "product"]
         path = next((p for p in candidates if p.exists()), None)
         if path is None:
-            print("Arquivo de entrada não encontrado.\nCrie o arquivo relativo ao script:\n - {}".format(candidates[0]))
+            print(f"Arquivo de entrada não encontrado.\nCrie o arquivo relativo ao script:\n - {candidates[0]}")
             sys.exit(1)
 
     try:
@@ -174,8 +165,7 @@ def main():
 
     save_png_table(rows, produto, png_path)
     with open(txt_path, "w", encoding="utf-8") as f:
-        for ln in _build_output_lines(rows, produto):
-            f.write(ln + "\n")
+        f.write("\n".join(_build_output_lines(rows, produto)) + "\n")
 
     print(f"\nArquivos gerados:\n - {png_path.resolve()}\n - {txt_path.resolve()}")
 
