@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-import re
 import matplotlib.pyplot as plt
 
 
@@ -33,48 +32,44 @@ def _fmt_money(v: float) -> str:
     return f"R$ {'-' if v < 0 else ''}{s_inteiro},{s_frac}"
 
 
-def _clean_categoria(label: str) -> str:
-    s = label.strip()
-    s = re.sub(r"\s*0[,.]\d+x$", "", s)
-    s = re.sub(r"^[A-Za-z]\s*-\s*", "", s)
-    return s
+def _config() -> dict:
+    return {
+        "novo": [
+            {"label": "Preço Competitivo", "mult": 0.95},
+            {"label": "Preço Muito Competitivo", "mult": 0.87},
+            {"label": "Preço Extremamente Competitivo", "mult": 0.75},
+            {"label": "Preço com Pressa Moderada", "mult": 0.62},
+            {"label": "Preço com Muita Preço", "mult": 0.49},
+            {"label": "Preço com Extrema Pressa e Desespero Moderado", "mult": 0.40},
+            {"label": "Preço com Extrema Pressa e Extremo Desespero", "mult": 0.3333},
+        ],
+        "usado": [
+            {"label": "Preço Muito Competitivo", "mult": 0.95},
+            {"label": "Preço Extremamente competitivo", "mult": 0.85},
+            {"label": "Preço com Moderada Pressa", "mult": 0.75},
+            {"label": "Preço com Muita Pressa", "mult": 0.66},
+            {"label": "Preço com Extrema Pressa e Desespero", "mult": 0.50},
+        ],
+    }
 
 
 def compute_rows(preco_novo: float, preco_usado: float):
-    novo_rules = [
-        ("1.A", "Produto (1) Novo", "A - Preço Competitivo 0,95x", 0.95),
-        ("1.B", "Produto (1) Novo", "B - Preço Muito Competitivo 0,87x", 0.87),
-        ("1.C", "Produto (1) Novo", "C - Preço Extremamente Competitivo 0,75x", 0.75),
-        ("1.D", "Produto (1) Novo", "D - Preço com Pressa Moderada 0,62x", 0.62),
-        ("1.E", "Produto (1) Novo", "E - Preço com Muita Pressa 0,49x", 0.49),
-        ("1.F", "Produto (1) Novo", "F - Preço com Extrema Pressa e Desespero Moderado 0,4x", 0.40),
-        ("1.G", "Produto (1) Novo", "G - Preço com Extrema Pressa e Extremo Desespero 0,3333x", 0.3333),
-    ]
-    usado_rules = [
-        ("2.A", "Produto (2) Usado", "A - Preço Muito Competitivo 0,95x", 0.95),
-        ("2.B", "Produto (2) Usado", "B - Preço Extremamente competitivo 0,85x", 0.85),
-        ("2.C", "Produto (2) Usado", "C - Preço com Moderada Pressa 0,75x", 0.75),
-        ("2.D", "Produto (2) Usado", "D - Preço com Muita Pressa 0,66x", 0.66),
-        ("2.E", "Produto (2) Usado", "E - Preço com Extrema Pressa e Desespero 0,50x", 0.50),
-    ]
+    cfg = _config()
     rows = []
-    for chave, tipo, categoria, mult in novo_rules:
+    for item in cfg["novo"]:
         rows.append({
-            "Chave": chave,
-            "Tipo": tipo,
-            "Categoria": _clean_categoria(categoria),
-            "Multiplicador": mult,
-            "Preço Otimizado": round(preco_novo * mult, 2),
+            "Tipo": "Produto Novo",
+            "Categoria": item["label"],
+            "Multiplicador": item["mult"],
+            "Preço Otimizado": round(preco_novo * item["mult"], 2),
         })
-    for chave, tipo, categoria, mult in usado_rules:
+    for item in cfg["usado"]:
         rows.append({
-            "Chave": chave,
-            "Tipo": tipo,
-            "Categoria": _clean_categoria(categoria),
-            "Multiplicador": mult,
-            "Preço Otimizado": round(preco_usado * mult, 2),
+            "Tipo": "Produto Usado",
+            "Categoria": item["label"],
+            "Multiplicador": item["mult"],
+            "Preço Otimizado": round(preco_usado * item["mult"], 2),
         })
-    rows.sort(key=lambda r: r["Chave"])
     return rows
 
 
@@ -93,25 +88,22 @@ def _format_block(grupo_rows, titulo_visivel: str):
 
 def print_table(rows, produto: str):
     print(f"Produto: {produto}\n")
-    titulo_map = {"Produto (1) Novo": "Produto Novo", "Produto (2) Usado": "Produto Usado"}
-    for tipo in ["Produto (1) Novo", "Produto (2) Usado"]:
+    for tipo in ["Produto Novo", "Produto Usado"]:
         grupo = [r for r in rows if r["Tipo"] == tipo]
         if not grupo:
             continue
-        for line in _format_block(grupo, titulo_map[tipo]):
+        for line in _format_block(grupo, tipo):
             print(line)
         print()
 
 
 def save_png_table(rows, produto: str, output_path: Path = Path("precos_otimizados.png")) -> Path:
-    titulo_map = {"Produto (1) Novo": "Produto Novo", "Produto (2) Usado": "Produto Usado"}
     all_lines = [f"Produto: {produto}", ""]
-    for i, tipo in enumerate(["Produto (1) Novo", "Produto (2) Usado"]):
+    for i, tipo in enumerate(["Produto Novo", "Produto Usado"]):
         grupo = [r for r in rows if r["Tipo"] == tipo]
         if not grupo:
             continue
-        block = _format_block(grupo, titulo_map[tipo])
-        all_lines.extend(block)
+        all_lines.extend(_format_block(grupo, tipo))
         if i == 0:
             all_lines.append("")
     fontsize = 12
