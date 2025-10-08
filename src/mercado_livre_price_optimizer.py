@@ -39,9 +39,9 @@ def _config() -> dict:
             {"label": "Preço Muito Competitivo", "mult": 0.87},
             {"label": "Preço Extremamente Competitivo", "mult": 0.75},
             {"label": "Preço com Pressa Moderada", "mult": 0.62},
-            {"label": "Preço com Muita Preço", "mult": 0.49},
-            {"label": "Preço com Extrema Pressa e Desespero Moderado", "mult": 0.40},
-            {"label": "Preço com Extrema Pressa e Extremo Desespero", "mult": 0.3333},
+            {"label": "Preço com Muita Pressa", "mult": 0.49},
+            {"label": "Preço com Pressa Extrema e Desespero Moderado", "mult": 0.40},
+            {"label": "Preço com Pressa Extrema e Extremo Desespero", "mult": 0.3333},
         ],
         "usado": [
             {"label": "Preço Muito Competitivo", "mult": 0.95},
